@@ -1,6 +1,6 @@
 # Scanning using nmap
 
-- nmap -A -F -T1 [IP Address] -v
+- `nmap -A -F -T1 [IP Address] -v`
 
     - -A : aggressive scan
     - -F : scans first 100 ports
