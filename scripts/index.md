@@ -173,3 +173,236 @@ set clipboard=unnamedplus    " Use system clipboard
 set mouse=a                  " Enable mouse support in all modes
 
 ```
+
+### Visual Mode
+
+- Press v to enter the visual mode
+
+- Use the arrow keys to select the text
+
+- Press d to delete the selected text
+
+- Press y to copy the selected text
+
+- Press p to paste the copied text
+
+- Press c to change the selected text
+
+- Press > to indent the selected text
+
+- Press < to unindent the selected text
+
+- Press U to convert the selected text to uppercase
+
+- Press u to convert the selected text to lowercase
+
+- Press ~ to toggle the case of the selected text
+
+- Press r to replace the selected text with the entered character
+
+- Press : to enter the command mode
+
+## Powershell
+
+### Introduction
+
+- Powershell is a task automation and configuration management framework from Microsoft.
+
+- It is a command line shell and scripting language.
+
+- It is built on the .NET framework.
+
+### Basic Commands
+
+- `$PSVersionTable.PSVersion` : Gives the powershell version installed.
+
+- `ExecutionPolicy Bypass`: This parameter sets the execution policy for the new PowerShell session to Bypass i.e. nothing is blocked.
+
+- Comments can be added using #.
+
+- Use | to pipe multiple commands.
+
+- Variables can be set in CLI using $ symbol.
+
+### Scripting
+
+- `Write-Host` : Used to write the text in console.
+
+- `Read-Host` : Used to read the user input from the console.
+
+  - We can use the -Prompt option to display any question or info before asking for inputs.
+
+- `set-location` : Enter any particular folder or location
+
+- `get-location` : Get the current location
+
+- `get-childitem` : Get the list of files and folders in the current location
+
+- `gal ` : Command is used for searching commandlets of similar name
+
+  - For example : `gal *sm` gives all commands ending from sm
+
+- `Export-csv` : exports the output to a csv file
+
+- `Import-csv` : imports the csv file
+
+- `Get-Process` : Get the list of processes running
+
+- `Get-Service` : Get the list of services running
+
+- `Export-clixml` : Exports the content to xml
+
+- `ConvertTo-csv` : Converts the data to csv but not make a new file.
+
+- `-Confirm` : Parameter asks for conformation before executing the command.
+
+### Arrays
+
+- Arrays in powershell can be declared using @(``) syntax
+
+- We can append the array using += symbol.
+
+### Hashmaps
+
+- Hashmaps can be declared using @{} syntax.
+
+- We can access the hashmap using the key.
+
+- We can use the .Add function to add the elements to the hashmap.
+
+## Bash scripting
+
+### Introduction
+
+- Bash is a Unix shell and command language.
+
+- It is a default shell on most Linux distributions.
+
+### Basics
+
+- `echo` : Used to print the text on the console.
+
+- `read` : Used to read the user input from the console.
+
+- Variables can be declared using the syntax `var_name=value`
+
+- Variables can be accessed using $ symbol.
+
+- We can use the `export` command to make the variable global.
+
+- Quoting :
+
+  - Single quotes : Used to print the text as it is.
+
+  - Double quotes : Used to print the text with variable values.
+
+### Handling named arguments
+
+- We can handle named arguments using the switch case and do case loops.
+
+- One example is,
+
+- ```sh
+  deploy=false
+  uglify=false
+
+  while (( $# > 1 )); do case $1 in
+      --deploy) deploy="$2";;
+      --uglify) uglify="$2";;
+      *) break;
+      esac; shift 2
+  done
+
+  $deploy && echo "will deploy... deploy = $deploy"
+  $uglify && echo "will uglify... deploy = $uglify"
+  ```
+
+### Basic operations
+
+- **Env Shebang** : The first line of the script must include the absolute path to the env executable with the argument bash.
+
+  - Example is : `#!/usr/bin/env bash`
+
+- **Direct Shebang** : the shebang is ignored when the bash command is used in the cli.
+
+- **Navigating directories** : The keyword `cd` can be used to navigate directories. Use $ sign to go to specific directory
+
+  - For example : ```sh
+    cd $(dirname "$(readlink -f "$0")")"
+
+    ```
+    - Explanation : `readlink -f $0"` determines the path to current script, dirname gives the name of current directory
+
+    ```
+
+  - **Listing Files** : Use the ls to list directories and files.
+
+    - - Regular file
+        b - Block special file
+        c - Character special file
+        C - High performance ("contiguous data") file
+        d - Directory
+        D - Door (special IPC file in Solaris 2.5+ only)
+        l - Symbolic link
+        M - Off-line ("migrated") file (Cray DMF)
+        n - Network special file (HP-UX)
+        p - FIFO (named pipe)
+        P - Port (special system file in Solaris 10+ only)
+        s - Socket
+        ? - Some other file type
+
+  - Listing all recently modified files : `ls -lt | head`
+
+### Cat Keyword
+
+- __Options__ : 
+
+  - __-n__ : Print line numbers
+  - __-v__ : Show non printing characters using ^ and M- notation except LFD and TAB
+  - __-T__ : Show tabs
+  - __-E__ : Show linefeed(LF) characters as $
+
+- Concatenate files : 
+
+  - ` cat file1 file2 > file_all `
+
+- Printing the contents of the file :
+
+  - `cat file.txt`
+  - To display the contents of the file in completely unambiguous byte to byte form, a hexdump is the standard solution.
+
+- Write to a file :
+
+  - `cat > file.txt`
+
+  - Use `>>` to append to a file.
+
+- We can read from a special input using <.
+
+### Grep 
+
+- Searching patterns in a file.
+
+  - `grep foo ~/Desktop/bar`
+
+### Aliases
+
+- Using a keyword alias to create and unalias to delete the alias.
+
+### Redirection
+
+- Use the arrow braces to redirect the input and output of a command.
+
+### If statements syntax
+
+- `if [[ $1 -eq ]]; then `
+
+### Looping over an array
+
+- ```sh
+    arr=(a b c d)
+    for i in "${arr[@]}"; do
+      echo "$i"
+    done
+  ```
+
