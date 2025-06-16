@@ -22,3 +22,4 @@
 - Ffuf is fast enough to be rate-limited by the server. To avoid this, we can use the `-p` flag to delay the request.
 
 - You can use dirb to fuzz slow.
+    
