@@ -30,6 +30,22 @@
 
   - Remote Code Execution
 
+## Detection
+
+- Single Quotation Marks ' and look for errors
+- Some SQL Syntax that evaluates to the base (original) value of the entry point, and to a different value, and look for systematic differences in the responses.
+- Boolean conditions like `OR 1=1` and look for differences
+- Payloads to trigger delays when executed.
+- OAST payloads to trigger out-of-band network interactions when executed and monitor differences.
+
+### Parts of the Query
+
+- Most common is - `WHERE` clause of the select statement
+- In `UPDATE` statements, within the updated values of the `WHERE` clause.
+- In `INSERT` statements, within inserted values.
+- In `SELECT` statements, within the table or column name.
+- In `SELECT` statements, within `ORDER BY` clause.
+
 ## Types of SQL Injection
 
 ### In-band SQLi (Classic SQLi)
@@ -150,6 +166,12 @@
 - Attakers use DNS and HTTP requests to retrieve data from database server.
 
 - For example, in MS SQL server, an attacker exploits the xp_dirtree command to send DNS requests to a server they control.
+
+### Stored / Second-order SQLi
+
+- When the main attacking HTTP request doesnot trigger the vulnerability immediately but db stores the data.
+- When any different HTTP Request tries to load the data from the DB the query triggers when loading.
+- When developer deems the stored data as trusted.
 
 ## SQL injection tools
 
