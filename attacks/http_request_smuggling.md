@@ -26,3 +26,11 @@
 - Reverse proxy - Sits before one or more web servers and forwards client request to the appropriate web server. While they can also perform as load balancers, but their primary purpose is to provide a single access point for back-end servers.
 
 ### Caching Mechanisms
+
+- Content Caching - By storing web content that doesn't change frequently like images, css or js files. caching mechanisms can reduce the load on web servers and speed up content delivery to users.
+- Database query caching - Databases cache results of frequent queries, reducing the time and compute needed to fetch the same data repeatedly.
+- Full-page caching - Entire web pages are cached, so they don't need to be regenerated for each user. This is especially useful for websites with high traffic.
+- Edge caching/CDNs - Content Delivery Networks (CDNs) cache content closer to the end user (at the 'edge' of the network) reducing the latency and speeding up the access for users
+- API caching - Caching the responses can significantly reduce back-end processing for APIs that serve similar requests repeatedly.
+
+### Understand HTTP Request Structure
