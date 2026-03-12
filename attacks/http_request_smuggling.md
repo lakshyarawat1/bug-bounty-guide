@@ -409,3 +409,31 @@ Transfer-Encoding
 
 ---
 
+## TE.TE Technique
+
+- Tranfer Encoding Obfuscation, also known as TE.TE.
+- TE.TE technique arises when both the front-end and the back-end servers use the Transfer-Encoding header.
+- In this technique, the attacker takes advantage of the servers' inconsistent handling of Transfer-Encoding present in the HTTP headers.
+- It doesnot always require multiple TE headers, it often involves a single malformed TE header that is interpreted differently by the front-end and the back-end servers.
+- In some cases, the front-end server might ignore or strip out the malformed part of the header and process the request normally, while the back-end server might interpret request differently due to malformed headers, leading to header smuggling.
+- Sample request :
+
+```
+POST / HTTP/1.1
+Host: example.com
+Content-length: 4
+Transfer-Encoding: chunked
+Transfer-Encoding: chunked1
+
+4e
+POST /update HTTP/1.1
+Host: example.com
+Content-length: 15
+
+isadmin=true
+0
+```
+
+- In above payload, the front-end server encounters two TE headers. The first one is standard chunked encoding, but the second one is not standard value i.e. chunked1.
+- Depending on its configuraiton, the front-end server might process the request based on the first TE header and ignore the malformed TE header value, interpreting the entire request up to 0 as a single chunk
+- The back-end server, however might handle the malformed TE header differently. It could either reject the malformed part and process the request similarly to the front-end or interpret the request differently due to presence of a non-standard value. If it processes only the first 4 bytes as indicated by the CL header, the remaining part of the request starting from  `POST /update` is then treated as separate, new request.
